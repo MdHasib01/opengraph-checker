@@ -1,69 +1,159 @@
-import Image from "next/image";
+import Image from "next/image"
+import Link from "next/link"
+import {
+  ClipboardCheckIcon,
+  CodeIcon,
+  ImageIcon,
+  LayoutGridIcon,
+  PencilLineIcon,
+  ShieldCheckIcon,
+} from "lucide-react"
+import { UrlForm } from "@/components/url-form"
+import { buttonVariants } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
+const EXAMPLES = ["github.com", "vercel.com", "nextjs.org", "ui.shadcn.com"]
+
+const FEATURES = [
+  { icon: LayoutGridIcon, title: "11 platform previews", body: "Google, Facebook, X, LinkedIn, Discord, Slack, WhatsApp, Telegram, iMessage, Pinterest and Reddit." },
+  { icon: PencilLineIcon, title: "Live meta editor", body: "Tweak titles, descriptions and images and watch every preview update instantly." },
+  { icon: ClipboardCheckIcon, title: "Validation report", body: "Missing tags, length limits, image size, aspect ratio and duplicate tags, flagged with fixes." },
+  { icon: CodeIcon, title: "Copy-ready code", body: "HTML meta tags, a Next.js metadata object, or React Helmet, generated from your edits." },
+  { icon: ImageIcon, title: "OG image generator", body: "Six templates, custom fonts and colors, plus AI-made backdrops. Export a 1200×630 PNG." },
+  { icon: ShieldCheckIcon, title: "Fetched like a crawler", body: "We request your page the way social crawlers do, follow redirects, and resolve relative URLs." },
+]
+
+const FAQ = [
+  {
+    q: "What is Open Graph?",
+    a: "Open Graph is a set of <meta> tags (og:title, og:description, og:image…) that tell social platforms and chat apps how to render a rich preview card when your link is shared.",
+  },
+  {
+    q: "What size should my og:image be?",
+    a: "1200×630 pixels (a 1.91:1 ratio) works everywhere. Keep it under 5 MB, use PNG or JPEG, and always use an absolute https URL.",
+  },
+  {
+    q: "Why does my preview look different on a platform?",
+    a: "Platforms cache previews aggressively. After fixing your tags, use each platform's own debugger (e.g. Facebook Sharing Debugger, LinkedIn Post Inspector) to refresh their cache.",
+  },
+  {
+    q: "Do I need both Open Graph and Twitter tags?",
+    a: "X/Twitter falls back to Open Graph tags for title, description and image, but you still need twitter:card to choose the large image layout.",
+  },
+]
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <>
+      <section className="relative overflow-hidden border-b">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgb(99_102_241/0.18),transparent_60%)]" />
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
+          <div>
+            <span className="inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+              Free Open Graph debugger &amp; image generator
+            </span>
+            <h1 className="mt-5 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+              See how your link looks <span className="text-indigo-600 dark:text-indigo-400">before</span> you share it
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+              Paste any URL to preview its card on every major platform, fix missing or broken meta tags, and generate
+              the code and images you need.
+            </p>
+            <UrlForm className="mt-8 max-w-xl" />
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span>Try:</span>
+              {EXAMPLES.map((ex) => (
+                <Link
+                  key={ex}
+                  href={`/check?url=${encodeURIComponent(`https://${ex}`)}`}
+                  className="rounded-full border px-2.5 py-0.5 transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  {ex}
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className="relative mx-auto w-full max-w-lg">
             <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+              src="/hero-illustration.png"
+              alt="Link preview cards floating above a browser window"
+              width={1024}
+              height={1024}
+              priority
+              className="h-auto w-full rounded-3xl"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
-      </main>
-    </div>
-  );
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-16">
+        <h2 className="text-center text-3xl font-bold tracking-tight">Everything you need for perfect link previews</h2>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f) => (
+            <Card key={f.title}>
+              <CardHeader>
+                <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                  <f.icon className="size-5" />
+                </div>
+                <CardTitle>{f.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">{f.body}</CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section id="how-it-works" className="scroll-mt-20 border-y bg-muted/40">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 lg:grid-cols-2">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">How it works</h2>
+            <ol className="mt-6 space-y-5">
+              {[
+                ["Enter a URL", "We fetch the page server-side like a social crawler and parse every meta and link tag."],
+                ["Review the previews", "See the card on 11 platforms and read the validation report for anything missing or wrong."],
+                ["Edit & copy", "Adjust tags in the editor, then copy the generated HTML or Next.js metadata into your site."],
+                ["Need an image?", "Open the generator, pick a template and download a 1200×630 PNG or use its dynamic URL."],
+              ].map(([title, body], i) => (
+                <li key={title} className="flex gap-4">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-sm font-semibold text-background">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <div className="font-semibold">{title}</div>
+                    <div className="text-sm text-muted-foreground">{body}</div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">FAQ</h2>
+            <div className="mt-6 divide-y rounded-xl border bg-background">
+              {FAQ.map((f) => (
+                <details key={f.q} className="group px-5 py-4">
+                  <summary className="cursor-pointer list-none font-medium marker:hidden">
+                    <span className="flex items-center justify-between gap-4">
+                      {f.q}
+                      <span className="text-muted-foreground transition-transform group-open:rotate-45">+</span>
+                    </span>
+                  </summary>
+                  <p className="mt-2 text-sm text-muted-foreground">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-16 text-center">
+        <h2 className="text-3xl font-bold tracking-tight">No image yet? Make one in seconds.</h2>
+        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+          Pick a template, type your title, choose an AI-made backdrop, and download.
+        </p>
+        <Link href="/generator" className={buttonVariants({ size: "lg", className: "mt-6 h-11 px-6" })}>
+          <ImageIcon /> Open the image generator
+        </Link>
+      </section>
+    </>
+  )
 }
