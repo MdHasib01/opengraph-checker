@@ -49,7 +49,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <Image src="/logo.png" alt="" width={28} height={28} className="rounded-md" />
+          {/* navy mark is inverted to white in dark mode so it stays visible */}
+          <Image src="/open-graph-logo.png" alt="" width={50} height={22} className="h-[22px] w-auto dark:brightness-0 dark:invert" />
           <span>OG Checker</span>
         </Link>
         {/* the pathname is unknown while prerendering dynamic routes like /short-links/[slug] */}
