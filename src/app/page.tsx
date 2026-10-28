@@ -9,12 +9,33 @@ import {
   ShieldCheckIcon,
 } from "lucide-react"
 import { BrokenPreviews } from "@/components/home/broken-previews"
+import { DiscordIcon, FacebookIcon, LinkedInIcon, SlackIcon, WhatsAppIcon, XIcon } from "@/components/home/social-icons"
 import { TemplateShowcase } from "@/components/home/template-showcase"
 import { UrlForm } from "@/components/url-form"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const EXAMPLES = ["github.com", "vercel.com", "nextjs.org", "ui.shadcn.com"]
+
+/** Grid tiles (column from centre, row from top) given a faint tint behind the hero. */
+const LIT_CELLS = [
+  [-11, 1],
+  [-8, 4],
+  [-3, 0],
+  [5, 2],
+  [9, 0],
+  [12, 5],
+]
+
+/** Placed in the illustration's empty corners so they never cover a card. */
+const PLATFORM_CHIPS = [
+  { icon: XIcon, label: "X", color: "text-foreground", pos: "top-[6%] left-[4%]", delay: "0s" },
+  { icon: FacebookIcon, label: "Facebook", color: "text-[#0866FF]", pos: "top-[2%] left-[52%]", delay: "-3s" },
+  { icon: LinkedInIcon, label: "LinkedIn", color: "text-[#0A66C2] dark:text-[#4C9BE8]", pos: "top-[8%] right-[2%]", delay: "-5s" },
+  { icon: DiscordIcon, label: "Discord", color: "text-[#5865F2]", pos: "top-[68%] right-[0%]", delay: "-2s" },
+  { icon: SlackIcon, label: "Slack", color: "", pos: "bottom-[2%] right-[22%]", delay: "-6s" },
+  { icon: WhatsAppIcon, label: "WhatsApp", color: "text-[#25D366]", pos: "top-[64%] left-[0%]", delay: "-4s" },
+]
 
 const FEATURES = [
   { icon: LayoutGridIcon, title: "11 platform previews", body: "Google, Facebook, X, LinkedIn, Discord, Slack, WhatsApp, Telegram, iMessage, Pinterest and Reddit." },
@@ -47,28 +68,49 @@ const FAQ = [
 export default function Home() {
   return (
     <>
-      <section className="relative overflow-hidden border-b">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgb(99_102_241/0.18),transparent_60%)]" />
+      <section className="relative isolate overflow-hidden border-b">
+        {/* hairline grid; tiles are centred so lit cells line up at 50% - 28px + 56px * col */}
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--grid-line)_1px,transparent_1px),linear-gradient(to_bottom,var(--grid-line)_1px,transparent_1px)] bg-size-[56px_56px] bg-top [--grid-line:color-mix(in_oklab,var(--foreground)_8%,transparent)] [mask-image:radial-gradient(ellipse_75%_70%_at_50%_0%,#000_35%,transparent_80%)]">
+          {LIT_CELLS.map(([col, row]) => (
+            <span
+              key={`${col}:${row}`}
+              className="absolute size-[55px] bg-indigo-500/[0.07] dark:bg-indigo-400/[0.08]"
+              style={{ left: `calc(50% - 27px + ${col * 56}px)`, top: row * 56 + 1 }}
+            />
+          ))}
+        </div>
+        <div className="absolute -top-40 left-1/2 -z-10 h-[420px] w-[min(900px,100%)] -translate-x-1/2 rounded-full bg-indigo-500/20 blur-[110px] dark:bg-indigo-500/25" />
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
           <div>
-            <span className="inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-indigo-400 opacity-75 motion-reduce:animate-none" />
+                <span className="relative inline-flex size-2 rounded-full bg-indigo-500" />
+              </span>
               Free Open Graph debugger &amp; image generator
             </span>
             <h1 className="mt-5 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-              See how your link looks <span className="text-indigo-600 dark:text-indigo-400">before</span> you share it
+              See how your link looks{" "}
+              <span className="bg-linear-to-r from-indigo-600 via-violet-600 to-pink-500 bg-clip-text text-transparent dark:from-indigo-400 dark:via-violet-400 dark:to-pink-400">
+                before
+              </span>{" "}
+              you share it
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground">
               Paste any URL to preview its card on every major platform, fix missing or broken meta tags, and generate
               the code and images you need.
             </p>
-            <UrlForm className="mt-8 max-w-xl" />
+            <div className="relative mt-8 max-w-xl">
+              <div className="absolute -inset-3 -z-10 rounded-3xl bg-linear-to-r from-indigo-500/15 via-violet-500/15 to-pink-500/10 blur-xl" />
+              <UrlForm />
+            </div>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span>Try:</span>
               {EXAMPLES.map((ex) => (
                 <Link
                   key={ex}
                   href={`/check?url=${encodeURIComponent(`https://${ex}`)}`}
-                  className="rounded-full border px-2.5 py-0.5 transition-colors hover:bg-muted hover:text-foreground"
+                  className="rounded-full border bg-background/60 px-2.5 py-0.5 backdrop-blur transition-colors hover:bg-muted hover:text-foreground"
                 >
                   {ex}
                 </Link>
@@ -76,14 +118,26 @@ export default function Home() {
             </div>
           </div>
           <div className="relative mx-auto w-full max-w-lg">
+            <div className="absolute inset-[14%] -z-10 rounded-full bg-linear-to-tr from-indigo-500/30 via-violet-500/25 to-pink-400/20 blur-3xl" />
             <Image
-              src="/hero-illustration.png"
-              alt="Link preview cards floating above a browser window"
-              width={1024}
-              height={1024}
+              src="/hero-illustration-v2.png"
+              alt="A link preview card fanning out to smaller platform cards"
+              width={1254}
+              height={1254}
               priority
-              className="h-auto w-full rounded-3xl"
+              sizes="(min-width: 1024px) 512px, 90vw"
+              className="h-auto w-full drop-shadow-[0_24px_48px_rgb(99_102_241/0.18)]"
             />
+            {PLATFORM_CHIPS.map(({ icon: Icon, label, color, pos, delay }) => (
+              <span
+                key={label}
+                title={label}
+                className={`absolute flex size-9 animate-float items-center justify-center rounded-xl border border-white/70 bg-white/75 shadow-lg shadow-indigo-500/15 backdrop-blur-md motion-reduce:animate-none sm:size-11 sm:rounded-2xl dark:border-white/10 dark:bg-white/10 ${pos}`}
+                style={{ animationDelay: delay }}
+              >
+                <Icon className={`size-4 sm:size-5 ${color}`} />
+              </span>
+            ))}
           </div>
         </div>
       </section>

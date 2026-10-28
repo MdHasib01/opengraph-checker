@@ -269,7 +269,7 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={`/api/og?${paramsToSearch(presetFor(t.id))}`} alt="" loading="lazy" className="aspect-[1200/630] w-full bg-muted" />
-                  <div className="truncate px-1.5 py-1 text-[11px] font-medium">{t.name}</div>
+                  <div className="truncate px-1.5 py-1 text-xs font-medium">{t.name}</div>
                 </button>
               ))}
             </div>

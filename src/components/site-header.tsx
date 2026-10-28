@@ -32,7 +32,7 @@ function NavLinks({ pathname }: { pathname: string | null }) {
             key={item.href}
             href={item.href}
             className={cn(
-              "items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
+              "items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground",
               item.wideOnly ? "hidden lg:inline-flex" : "inline-flex",
               active && "bg-muted text-foreground"
             )}
@@ -40,7 +40,7 @@ function NavLinks({ pathname }: { pathname: string | null }) {
             <item.icon className="size-4" />
             {item.label}
             {item.badge ? (
-              <Badge className={cn("h-4 px-1.5 text-[10px]", BADGE_STYLE[item.badge])}>{item.badge}</Badge>
+              <Badge className={cn("h-[18px] px-1.5 text-[11px]", BADGE_STYLE[item.badge])}>{item.badge}</Badge>
             ) : null}
           </Link>
         )

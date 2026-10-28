@@ -52,7 +52,7 @@ export function ClicksChart({ data }: { data: { date: string; clicks: number }[]
           return (
             <g key={t}>
               <line x1={PAD.left} x2={width - PAD.right} y1={y} y2={y} className="stroke-border" strokeWidth={1} />
-              <text x={PAD.left - 8} y={y + 4} textAnchor="end" className="fill-muted-foreground text-[11px] tabular-nums">
+              <text x={PAD.left - 8} y={y + 4} textAnchor="end" className="fill-muted-foreground text-xs tabular-nums">
                 {t}
               </text>
             </g>
@@ -74,7 +74,7 @@ export function ClicksChart({ data }: { data: { date: string; clicks: number }[]
                 />
               )}
               {i % labelEvery === 0 && (
-                <text x={x + barW / 2} y={HEIGHT - 8} textAnchor="middle" className="fill-muted-foreground text-[11px]">
+                <text x={x + barW / 2} y={HEIGHT - 8} textAnchor="middle" className="fill-muted-foreground text-xs">
                   {label(d.date, { month: "short", day: "numeric" })}
                 </text>
               )}

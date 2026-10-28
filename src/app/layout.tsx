@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import Link from "next/link"
+import { AnnouncementBar } from "@/components/announcement-bar"
 import { SiteHeader } from "@/components/site-header"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
@@ -26,7 +27,15 @@ export const metadata: Metadata = {
     images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "OG Checker" }],
   },
   twitter: { card: "summary_large_image", images: ["/og-default.png"] },
-  icons: { icon: "/logo.png" },
+  icons: {
+    icon: [
+      // fallback for Safari, which doesn't support SVG favicons
+      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+      // listed last so browsers that support it prefer it: swaps between an indigo and a white
+      // mark to match the browser's light/dark theme
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -35,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider>
+            <AnnouncementBar />
             <SiteHeader />
             <main className="flex-1">{children}</main>
             <footer className="border-t py-8 text-sm text-muted-foreground">
