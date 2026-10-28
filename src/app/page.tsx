@@ -8,6 +8,8 @@ import {
   PencilLineIcon,
   ShieldCheckIcon,
 } from "lucide-react"
+import { BrokenPreviews } from "@/components/home/broken-previews"
+import { TemplateShowcase } from "@/components/home/template-showcase"
 import { UrlForm } from "@/components/url-form"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -85,6 +87,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <BrokenPreviews />
+
+      <TemplateShowcase />
 
       <section className="mx-auto max-w-7xl px-4 py-16">
         <h2 className="text-center text-3xl font-bold tracking-tight">Everything you need for perfect link previews</h2>

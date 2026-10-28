@@ -12,10 +12,22 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Textarea } from "@/components/ui/textarea"
-import { FONTS, TEMPLATES, paramsToSearch, type FontName, type OgParams } from "@/lib/og-templates"
+import {
+  FONTS,
+  IMAGE_TEMPLATES,
+  TEMPLATES,
+  paramsToSearch,
+  presetFor,
+  switchTemplate,
+  type FontName,
+  type OgParams,
+} from "@/lib/og-templates"
 import { cn } from "@/lib/utils"
 
-const BACKGROUNDS = Array.from({ length: 6 }, (_, i) => `/backgrounds/bg-${i + 1}.png`)
+const BACKGROUNDS = [
+  ...Array.from({ length: 6 }, (_, i) => `/backgrounds/bg-${i + 1}.png`),
+  ...["saas", "roadtrip", "conference", "house", "hotel", "dessert", "headphones", "city", "laptop", "portrait"].map((n) => `/templates/${n}.jpg`),
+]
 
 const PALETTES: Pick<OgParams, "bg" | "bg2" | "fg" | "accent">[] = [
   { bg: "#4f46e5", bg2: "#db2777", fg: "#ffffff", accent: "#facc15" },
@@ -63,7 +75,7 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
     window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname)
   }, [query])
 
-  const usesImage = params.template === "backdrop" || params.template === "split"
+  const usesImage = IMAGE_TEMPLATES.has(params.template)
   const absoluteUrl = `${origin}${src}`
 
   async function download() {
@@ -138,14 +150,14 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
               {TEMPLATES.map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => set({ template: t.id })}
+                  onClick={() => setParams((p) => switchTemplate(p, t.id))}
                   className={cn(
                     "overflow-hidden rounded-lg border-2 text-left transition-colors",
                     params.template === t.id ? "border-primary" : "border-transparent hover:border-border"
                   )}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`/api/og?template=${t.id}`} alt="" loading="lazy" className="aspect-[1200/630] w-full bg-muted" />
+                  <img src={`/api/og?${paramsToSearch(presetFor(t.id))}`} alt="" loading="lazy" className="aspect-[1200/630] w-full bg-muted" />
                   <div className="truncate px-1.5 py-1 text-[11px] font-medium">{t.name}</div>
                 </button>
               ))}
@@ -159,6 +171,16 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
           <div className="space-y-1.5">
             <Label htmlFor="g-desc">Description</Label>
             <Textarea id="g-desc" rows={2} value={params.description} onChange={(e) => set({ description: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="g-eyebrow">Eyebrow / price</Label>
+              <Input id="g-eyebrow" placeholder="e.g. $249.00" value={params.eyebrow} onChange={(e) => set({ eyebrow: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="g-cta">Button</Label>
+              <Input id="g-cta" placeholder="e.g. Buy now" value={params.cta} onChange={(e) => set({ cta: e.target.value })} />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -209,7 +231,7 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
 
           <div className={cn("space-y-2", !usesImage && "opacity-60")}>
             <Label>
-              AI backdrop <span className="font-normal text-muted-foreground">(Split &amp; AI backdrop templates)</span>
+              Image <span className="font-normal text-muted-foreground">(photo templates)</span>
             </Label>
             <div className="grid grid-cols-4 gap-2">
               <button
