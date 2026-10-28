@@ -112,7 +112,7 @@ function AccessKeyDialog({ onChanged }: { onChanged: () => void }) {
           <div className="text-sm font-medium">Use a different key</div>
           <div className="flex gap-2">
             <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Paste an access key" className="font-mono text-xs" />
-            <Button type="submit" variant="secondary">
+            <Button type="submit">
               Switch
             </Button>
           </div>

@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import {
   ClipboardCheckIcon,
@@ -9,7 +8,7 @@ import {
   ShieldCheckIcon,
 } from "lucide-react"
 import { BrokenPreviews } from "@/components/home/broken-previews"
-import { DiscordIcon, FacebookIcon, LinkedInIcon, SlackIcon, WhatsAppIcon, XIcon } from "@/components/home/social-icons"
+import { HeroPreviews } from "@/components/home/hero-previews"
 import { TemplateShowcase } from "@/components/home/template-showcase"
 import { UrlForm } from "@/components/url-form"
 import { buttonVariants } from "@/components/ui/button"
@@ -25,16 +24,6 @@ const LIT_CELLS = [
   [5, 2],
   [9, 0],
   [12, 5],
-]
-
-/** Placed in the illustration's empty corners so they never cover a card. */
-const PLATFORM_CHIPS = [
-  { icon: XIcon, label: "X", color: "text-foreground", pos: "top-[6%] left-[4%]", delay: "0s" },
-  { icon: FacebookIcon, label: "Facebook", color: "text-[#0866FF]", pos: "top-[2%] left-[52%]", delay: "-3s" },
-  { icon: LinkedInIcon, label: "LinkedIn", color: "text-[#0A66C2] dark:text-[#4C9BE8]", pos: "top-[8%] right-[2%]", delay: "-5s" },
-  { icon: DiscordIcon, label: "Discord", color: "text-[#5865F2]", pos: "top-[68%] right-[0%]", delay: "-2s" },
-  { icon: SlackIcon, label: "Slack", color: "", pos: "bottom-[2%] right-[22%]", delay: "-6s" },
-  { icon: WhatsAppIcon, label: "WhatsApp", color: "text-[#25D366]", pos: "top-[64%] left-[0%]", delay: "-4s" },
 ]
 
 const FEATURES = [
@@ -117,28 +106,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="relative mx-auto w-full max-w-lg">
-            <div className="absolute inset-[14%] -z-10 rounded-full bg-linear-to-tr from-indigo-500/30 via-violet-500/25 to-pink-400/20 blur-3xl" />
-            <Image
-              src="/hero-illustration-v2.png"
-              alt="A link preview card fanning out to smaller platform cards"
-              width={1254}
-              height={1254}
-              priority
-              sizes="(min-width: 1024px) 512px, 90vw"
-              className="h-auto w-full drop-shadow-[0_24px_48px_rgb(99_102_241/0.18)]"
-            />
-            {PLATFORM_CHIPS.map(({ icon: Icon, label, color, pos, delay }) => (
-              <span
-                key={label}
-                title={label}
-                className={`absolute flex size-9 animate-float items-center justify-center rounded-xl border border-white/70 bg-white/75 shadow-lg shadow-indigo-500/15 backdrop-blur-md motion-reduce:animate-none sm:size-11 sm:rounded-2xl dark:border-white/10 dark:bg-white/10 ${pos}`}
-                style={{ animationDelay: delay }}
-              >
-                <Icon className={`size-4 sm:size-5 ${color}`} />
-              </span>
-            ))}
-          </div>
+          <HeroPreviews />
         </div>
       </section>
 
@@ -175,7 +143,7 @@ export default function Home() {
                 ["Need an image?", "Open the generator, pick a template and download a 1200×630 PNG or use its dynamic URL."],
               ].map(([title, body], i) => (
                 <li key={title} className="flex gap-4">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-sm font-semibold text-background">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                     {i + 1}
                   </span>
                   <div>

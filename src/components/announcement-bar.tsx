@@ -13,7 +13,7 @@ export function AnnouncementBar() {
       <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 text-white in-data-promo-dismissed:hidden">
         {/* soft highlight so the bar doesn't read as a flat block */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgb(255_255_255/0.18),transparent_60%)]" />
-        <div className="relative mx-auto flex max-w-7xl items-center justify-center gap-3 py-2 pr-12 pl-4 text-sm">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-center gap-3 px-12 py-2 text-sm">
           <span className="hidden shrink-0 rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase ring-1 ring-white/25 sm:inline">
             New
           </span>
@@ -29,8 +29,9 @@ export function AnnouncementBar() {
             Generate now
             <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
           </Link>
-          <DismissAnnouncement />
         </div>
+        {/* outside the centered container so it sits at the far right edge of the screen */}
+        <DismissAnnouncement />
       </div>
     </>
   )

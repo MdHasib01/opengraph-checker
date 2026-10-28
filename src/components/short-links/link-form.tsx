@@ -317,7 +317,7 @@ export function LinkForm({
               onClick={() => setPlatform(p.id)}
               className={cn(
                 "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                platform === p.id ? "border-foreground bg-foreground text-background" : "hover:bg-muted"
+                platform === p.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted"
               )}
             >
               {p.name}

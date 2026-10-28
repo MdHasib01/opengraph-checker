@@ -139,7 +139,7 @@ export function LinkAnalytics({ slug }: { slug: string }) {
                 <button
                   key={r}
                   onClick={() => setDays(r)}
-                  className={cn("rounded-md px-2.5 py-1 text-xs font-medium", days === r ? "bg-muted" : "text-muted-foreground")}
+                  className={cn("rounded-md px-2.5 py-1 text-xs font-medium", days === r ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
                 >
                   {r}d
                 </button>

@@ -16,7 +16,7 @@ export function DismissAnnouncement() {
           // storage blocked (private mode): still hidden for this page view
         }
       }}
-      className="absolute right-3 inline-flex size-7 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/15 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
+      className="absolute top-1/2 right-3 inline-flex -translate-y-1/2 size-7 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/15 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
     >
       <XIcon className="size-4" />
     </button>
