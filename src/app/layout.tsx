@@ -39,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <main className="flex-1">{children}</main>
             <footer className="border-t py-8 text-sm text-muted-foreground">
               <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 sm:flex-row">
-                <span>© {new Date().getFullYear()} OG Checker. Built with Next.js & shadcn/ui.</span>
+                <span>© OG Checker. Built with Next.js & shadcn/ui.</span>
                 <nav className="flex gap-4">
                   <Link href="/" className="hover:text-foreground">Checker</Link>
                   <Link href="/generator" className="hover:text-foreground">Image generator</Link>

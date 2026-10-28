@@ -31,7 +31,7 @@ export function CodeBlock({ code }: { code: string }) {
       <div className="absolute top-2 right-2">
         <CopyButton value={code} />
       </div>
-      <pre className="max-h-[520px] overflow-auto rounded-lg border bg-muted/50 p-4 pr-24 font-mono text-xs leading-relaxed">
+      <pre className="max-h-[520px] overflow-auto rounded-lg border bg-muted/50 p-4 pr-24 font-mono text-xs leading-relaxed break-all whitespace-pre-wrap">
         <code>{code}</code>
       </pre>
     </div>

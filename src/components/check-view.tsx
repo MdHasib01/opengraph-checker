@@ -198,7 +198,7 @@ function Results({
             {shown.map(({ id, name, Component, surface }) => (
               <Card key={id} className="gap-0 overflow-hidden py-0">
                 <div className="border-b px-4 py-2.5 text-sm font-medium">{name}</div>
-                <div className={cn("flex min-h-48 items-center justify-center p-5", surface)}>
+                <div className={cn("flex min-h-48 flex-1 items-center justify-center p-5", surface)}>
                   <Component data={data} themeColor={meta.themeColor} />
                 </div>
               </Card>
