@@ -43,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <nav className="flex gap-4">
                   <Link href="/" className="hover:text-foreground">Checker</Link>
                   <Link href="/generator" className="hover:text-foreground">Image generator</Link>
+                  <Link href="/short-links" className="hover:text-foreground">Short links</Link>
                 </nav>
               </div>
             </footer>

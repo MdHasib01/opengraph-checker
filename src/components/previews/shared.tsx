@@ -10,6 +10,10 @@ export type PreviewProps = { data: PreviewData }
 export function proxied(url: string) {
   if (!url) return ""
   if (url.startsWith("/") || url.startsWith("data:") || url.startsWith("blob:")) return url
+  // our own short-link images: the proxy (rightly) refuses localhost in dev
+  if (typeof window !== "undefined" && url.startsWith(`${window.location.origin}/`)) {
+    return url.slice(window.location.origin.length)
+  }
   return `/api/proxy-image?url=${encodeURIComponent(url)}`
 }
 
