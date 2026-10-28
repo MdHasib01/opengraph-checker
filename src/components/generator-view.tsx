@@ -1,11 +1,11 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useState, useSyncExternalStore } from "react"
-import { BanIcon, DownloadIcon, Loader2Icon } from "lucide-react"
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react"
+import { BanIcon, DownloadIcon, Loader2Icon, UploadIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
 import { CodeBlock, CopyButton } from "@/components/code-block"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -40,6 +40,72 @@ const PALETTES: Pick<OgParams, "bg" | "bg2" | "fg" | "accent">[] = [
 
 const noopSubscribe = () => () => {}
 
+const UPLOAD_ACCEPT = "image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+
+type Upload = { name: string; data: string }
+type Uploads = { logo: Upload | null; image: Upload | null }
+
+/** Downscales an uploaded file in the browser so the render request stays small. */
+async function readUpload(file: File, maxSide: number, type: "image/png" | "image/jpeg") {
+  const url = URL.createObjectURL(file)
+  try {
+    const img = new window.Image()
+    img.src = url
+    await img.decode()
+    // SVGs without width/height report 0
+    const w = img.naturalWidth || maxSide
+    const h = img.naturalHeight || maxSide
+    const scale = Math.min(1, maxSide / Math.max(w, h))
+    const canvas = document.createElement("canvas")
+    canvas.width = Math.max(1, Math.round(w * scale))
+    canvas.height = Math.max(1, Math.round(h * scale))
+    const ctx = canvas.getContext("2d")!
+    if (type === "image/jpeg") {
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+    return canvas.toDataURL(type, 0.86)
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
+/** Renders through POST, since uploaded files are too big for the image URL. */
+async function renderWithUploads(query: string, uploads: Uploads, signal?: AbortSignal) {
+  const res = await fetch("/api/og", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ query, logo: uploads.logo?.data, image: uploads.image?.data }),
+    signal,
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.blob()
+}
+
+type FilePickerProps = { onFile: (file: File) => void; label: string; className?: string; children: ReactNode }
+
+/** A label styled as the trigger; the visually hidden input keeps it keyboard reachable. */
+function FilePicker({ onFile, label, className, children }: FilePickerProps) {
+  return (
+    <label title={label} className={cn("cursor-pointer has-focus-visible:ring-3 has-focus-visible:ring-ring/50", className)}>
+      <input
+        type="file"
+        accept={UPLOAD_ACCEPT}
+        aria-label={label}
+        className="sr-only"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          e.target.value = ""
+          if (file) onFile(file)
+        }}
+      />
+      {children}
+    </label>
+  )
+}
+
 function useDebounced<T>(value: T, ms: number) {
   const [debounced, setDebounced] = useState(value)
   useEffect(() => {
@@ -65,8 +131,13 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
   const [params, setParams] = useState(initial)
   const set = (patch: Partial<OgParams>) => setParams((p) => ({ ...p, ...patch }))
   const query = useDebounced(paramsToSearch(params), 400)
-  const src = `/api/og${query ? `?${query}` : ""}`
+  const urlSrc = `/api/og${query ? `?${query}` : ""}`
+  const [uploads, setUploads] = useState<Uploads>({ logo: null, image: null })
+  const hasUploads = !!(uploads.logo || uploads.image)
+  const [rendered, setRendered] = useState<{ query: string; uploads: Uploads; url: string } | null>(null)
+  const src = hasUploads && rendered ? rendered.url : urlSrc
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
+  const rendering = loadedSrc !== src || (hasUploads && (rendered?.query !== query || rendered.uploads !== uploads))
   const origin = useSyncExternalStore(noopSubscribe, () => window.location.origin, () => "")
   const [downloading, setDownloading] = useState(false)
 
@@ -75,15 +146,49 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
     window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname)
   }, [query])
 
+  useEffect(() => {
+    if (!hasUploads) return
+    const ctrl = new AbortController()
+    renderWithUploads(query, uploads, ctrl.signal)
+      .then((blob) => setRendered({ query, uploads, url: URL.createObjectURL(blob) }))
+      .catch(() => {
+        if (!ctrl.signal.aborted) toast.error("Could not render your upload")
+      })
+    return () => ctrl.abort()
+  }, [query, uploads, hasUploads])
+
+  // Free each rendered blob once a newer one replaces it.
+  useEffect(() => () => {
+    if (rendered) URL.revokeObjectURL(rendered.url)
+  }, [rendered])
+
   const usesImage = IMAGE_TEMPLATES.has(params.template)
-  const absoluteUrl = `${origin}${src}`
+  const absoluteUrl = `${origin}${urlSrc}`
+
+  async function upload(kind: keyof Uploads, file: File) {
+    if (!file.type.startsWith("image/")) return toast.error("Choose an image file")
+    if (file.size > MAX_UPLOAD_BYTES) return toast.error("Images must be under 20 MB")
+    try {
+      const data = kind === "logo" ? await readUpload(file, 256, "image/png") : await readUpload(file, 1600, "image/jpeg")
+      setUploads((u) => ({ ...u, [kind]: { name: file.name, data } }))
+    } catch {
+      toast.error("Could not read that image")
+    }
+  }
+
+  const clearUpload = (kind: keyof Uploads) => setUploads((u) => ({ ...u, [kind]: null }))
 
   async function download() {
     setDownloading(true)
     try {
-      const res = await fetch(src)
-      if (!res.ok) throw new Error()
-      const blob = await res.blob()
+      let blob: Blob
+      if (hasUploads) {
+        blob = await renderWithUploads(query, uploads)
+      } else {
+        const res = await fetch(urlSrc)
+        if (!res.ok) throw new Error()
+        blob = await res.blob()
+      }
       const a = document.createElement("a")
       a.href = URL.createObjectURL(blob)
       a.download = `og-${params.template}.png`
@@ -113,7 +218,7 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
               onLoad={() => setLoadedSrc(src)}
               onError={() => setLoadedSrc(src)}
             />
-            {loadedSrc !== src && (
+            {rendering && (
               <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-xs shadow">
                 <Loader2Icon className="size-3 animate-spin" /> Rendering
               </div>
@@ -139,6 +244,12 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
           <p className="text-xs text-muted-foreground">
             The dynamic URL renders on request. For production, download the PNG and host it with your site.
           </p>
+          {hasUploads && (
+            <p className="text-xs text-amber-700 dark:text-amber-400">
+              Uploaded files are only in the downloaded PNG. The image URL can&apos;t carry them, so host the file and paste its URL
+              if you need the dynamic link.
+            </p>
+          )}
         </div>
       </div>
 
@@ -204,8 +315,24 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="g-logo">Logo URL</Label>
-            <Input id="g-logo" placeholder="https://…/logo.png" value={params.logo} onChange={(e) => set({ logo: e.target.value })} />
+            <Label htmlFor="g-logo">Logo</Label>
+            {uploads.logo ? (
+              <div className="flex items-center gap-2 rounded-lg border px-2 py-1.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={uploads.logo.data} alt="" className="size-6 rounded object-contain" />
+                <span className="min-w-0 flex-1 truncate text-sm">{uploads.logo.name}</span>
+                <Button type="button" variant="ghost" size="icon-xs" aria-label="Remove uploaded logo" onClick={() => clearUpload("logo")}>
+                  <XIcon />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input id="g-logo" placeholder="https://…/logo.png" value={params.logo} onChange={(e) => set({ logo: e.target.value })} />
+                <FilePicker onFile={(f) => upload("logo", f)} label="Upload a logo" className={buttonVariants({ variant: "outline" })}>
+                  <UploadIcon /> Upload
+                </FilePicker>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -235,26 +362,60 @@ export function GeneratorView({ initial }: { initial: OgParams }) {
             </Label>
             <div className="grid grid-cols-4 gap-2">
               <button
-                onClick={() => set({ image: "" })}
+                onClick={() => {
+                  clearUpload("image")
+                  set({ image: "" })
+                }}
                 aria-label="No image"
                 className={cn(
                   "flex aspect-square items-center justify-center rounded-md border-2 bg-muted",
-                  !params.image ? "border-primary" : "border-transparent"
+                  !uploads.image && !params.image ? "border-primary" : "border-transparent"
                 )}
               >
                 <BanIcon className="size-4 text-muted-foreground" />
               </button>
+              <FilePicker
+                onFile={(f) => upload("image", f)}
+                label={uploads.image ? `Replace uploaded image (${uploads.image.name})` : "Upload an image"}
+                className={cn(
+                  "relative flex aspect-square items-center justify-center overflow-hidden rounded-md border-2",
+                  uploads.image ? "border-primary" : "border-dashed border-border bg-muted hover:border-muted-foreground"
+                )}
+              >
+                {uploads.image ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={uploads.image.data} alt="" className="absolute inset-0 size-full object-cover" />
+                    <UploadIcon className="relative size-4 rounded bg-background/80 p-0.5" />
+                  </>
+                ) : (
+                  <UploadIcon className="size-4 text-muted-foreground" />
+                )}
+              </FilePicker>
               {BACKGROUNDS.map((bg) => (
                 <button
                   key={bg}
-                  onClick={() => set({ image: bg })}
-                  className={cn("overflow-hidden rounded-md border-2", params.image === bg ? "border-primary" : "border-transparent")}
+                  onClick={() => {
+                    clearUpload("image")
+                    set({ image: bg })
+                  }}
+                  className={cn(
+                    "overflow-hidden rounded-md border-2",
+                    !uploads.image && params.image === bg ? "border-primary" : "border-transparent"
+                  )}
                 >
                   <Image src={bg} alt="" width={96} height={96} className="aspect-square w-full object-cover" />
                 </button>
               ))}
             </div>
-            <Input placeholder="…or paste an image URL" value={BACKGROUNDS.includes(params.image) ? "" : params.image} onChange={(e) => set({ image: e.target.value })} />
+            <Input
+              placeholder="…or paste an image URL"
+              value={uploads.image || BACKGROUNDS.includes(params.image) ? "" : params.image}
+              onChange={(e) => {
+                clearUpload("image")
+                set({ image: e.target.value })
+              }}
+            />
             {params.template === "backdrop" && (
               <div className="space-y-2 pt-1">
                 <div className="flex justify-between text-xs">

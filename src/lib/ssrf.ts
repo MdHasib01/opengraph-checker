@@ -101,7 +101,7 @@ export async function safeFetch(
 }
 
 /** Reads a response body, stopping at `maxBytes`. */
-export async function readLimited(res: Response, maxBytes: number) {
+export async function readLimited(res: Pick<Response, "body">, maxBytes: number) {
   if (!res.body) return new Uint8Array()
   const reader = res.body.getReader()
   const chunks: Uint8Array[] = []

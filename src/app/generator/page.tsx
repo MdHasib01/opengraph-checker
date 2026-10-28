@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { GeneratorView } from "@/components/generator-view"
-import { DEFAULT_PARAMS, searchToParams } from "@/lib/og-templates"
+import { presetFor, searchToParams } from "@/lib/og-templates"
 
 export const metadata: Metadata = {
   title: "Open Graph image generator",
@@ -12,7 +12,7 @@ async function GeneratorContent({ searchParams }: { searchParams: PageProps<"/ge
   const query = await searchParams
   const sp = new URLSearchParams()
   for (const [k, v] of Object.entries(query)) if (typeof v === "string") sp.set(k, v)
-  return <GeneratorView initial={sp.size ? searchToParams(sp) : DEFAULT_PARAMS} />
+  return <GeneratorView initial={sp.size ? searchToParams(sp) : presetFor("event")} />
 }
 
 export default function GeneratorPage(props: PageProps<"/generator">) {
